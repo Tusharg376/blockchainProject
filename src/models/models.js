@@ -1,10 +1,16 @@
 const mongoose = require('mongoose')
 
 const coinSchema = new mongoose.Schema({
-    symbol: String,
-    name:String,
+    symbol: {
+        type: String,
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
     marketCapUsd: String,
-    priceUsd:String
+    priceUsd: String
 })
 
 module.exports = mongoose.model('coin', coinSchema)
