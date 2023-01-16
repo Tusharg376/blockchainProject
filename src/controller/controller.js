@@ -1,19 +1,31 @@
-const coinModel = require('../models/models')
-const axios = require('axios')
+const { default: axios } = require('axios');
+const blockModel = require('../models/models');
+
 const getCoins = async function (req, res) {
+    try {
+        let options = {
+            headers: { Authorization: "Bearer 86e02694-a58e-4f6e-9acd-af99ddbafbe7" },
+            method: "get",
+            url: `https://api.coincap.io/v2/assets`
+        }
+        let result = await axios(options)
+        console.log(result)
+        let data = result.data.data
+        const sortdata = data.sort((a, b) => { return a.changePercent24Hr - b.changePercent24Hr });
 
-    let coinData = await axios.get('https://api.coincap.io/v2/assets')
-    let data = coinData.data.data[0]
+        await blockModel.deleteMany()
 
+        let block = await blockModel.create(sortdata)
 
-    let { symbol, name, marketCapUsd, priceUsd, changePercent24Hr } = data
+        let finalBlocks = await blockModel.find().select({ __v: 0, _id: 0 })
 
-    let finalData = await coinModel.create(data)
+        return res.status(201).send({ staus: true, message: "Blocks successfully created", data: finalBlocks })
 
-    res.status(200).send({ status: true, data: symbol, name, marketCapUsd, priceUsd, changePercent24Hr })
+    } catch (error) {
+        return res.status(500).send({ status: false, message: error.message })
 
+    }
 }
-
 
 
 
